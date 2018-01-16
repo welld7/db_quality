@@ -303,7 +303,7 @@ def main():
 
 
         #drop_status_table(conn)
-        #We won't count avg for VARCHAR as we don't know how to
+        #We won't calculate avg for VARCHAR as we don't know how to
         sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
                                             load_date date,
                                             non_unique_id_int integer,
