@@ -245,9 +245,6 @@ def get_next_day( load_data):
 
 
 def add_day_status_row(conn, load_data):
-    #ld_date = datetime.datetime.strptime(load_data, "%Y-%m-%d")
-    #next_day = datetime.datetime.strftime(ld_date + datetime.timedelta(days=1),
-    #                                     "%Y-%m-%d")
 
     next_day = get_next_day(load_data)
 
