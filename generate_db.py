@@ -1,4 +1,6 @@
 from db_quality_main import *
+from string import ascii_lowercase
+
 MAX = 1000000
 MIN = -1000000
 
@@ -14,8 +16,12 @@ def get_prev_day_raw( date_raw):
     return date_raw + datetime.timedelta(days=-1)
 
 
-#def random_date( today):
-#    max_day = datetime.date.today()
+def random_date( today):
+    max_day = datetime.date.today()
+    year = randint(1970, 2100)
+    month = randint(1, 12)
+    day = randint(1, 28) #it's OK
+    birth_date = datetime(year, month, day)
 
 def generate_db( conn, generate_days, rows_per_day):
     today = datetime.date.today()
@@ -25,16 +31,41 @@ def generate_db( conn, generate_days, rows_per_day):
         ld_date = datetime.datetime.strftime(date, "%Y-%m-%d")
         avg_int = randint(MIN, MAX)
         avg_float = uniform(MIN,MAX)
+        avg_date_raw = datetime.datetime(randint(1970, 2100), randint(1, 12),
+                                         randint(1, 28)) #2100 is fine
+        avg_date_str = datetime.datetime.strftime(avg_date_raw, "%Y-%m-%d")
 
-        sum = 0
+        #sum = 0
+        null_cnt = 0
+        z0_cnt = 0
+        id_int_map = {}
         for n_th_in_day in range(rows_per_day):
             current_int = avg_int - rows_per_day + n_th_in_day * 2 + 1
             current_float = avg_float - rows_per_day + n_th_in_day * 2 + 1
-            sum+=current_float
-            row = ( ld_date, randint(0, 1000000), current_int, avg_float, "hi", '2013-01-05')
+
+            z0_cnt += 1 if current_int == 0 else 0
+            z0_cnt += 1 if current_float == 0 else 0
+
+            length = randint(0,10)
+            if length == 0:
+                current_sting = None
+                null_cnt += 1
+            else:
+                current_sting = ''.join(choice(ascii_lowercase)
+                                        for _ in range(length))
+
+            #sum += current_float
+            id = randint(0, 1000000)
+            row = ( ld_date, id, current_int,
+                    avg_float, current_sting, avg_date_str)
             insert_new_row(conn, row)
 
-        print ( sum/rows_per_day, avg_float)
+        #todo : pairing fuction for id+int
+        row2 = (ld_date, 0, rows_per_day, null_cnt, z0_cnt, avg_int, avg_float, avg_date_str)
+
+        insert_new_row_status(conn, row2)
+
+        #print ( sum/rows_per_day, avg_float)
 
 database2 = "pythonsqlite_backup.db"
 
@@ -68,7 +99,7 @@ sql = ''' PRAGMA synchronous = 0; '''
 cur.execute(sql)
 conn.commit()
 
-generate_db(conn, generate_days=10, rows_per_day=16 )
-#print_table(conn)
+generate_db(conn, generate_days=10, rows_per_day=4 )
+print_table(conn)
 
 conn.close()

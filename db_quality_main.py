@@ -1,5 +1,5 @@
 import sqlite3
-from random import randint, uniform
+from random import randint, uniform, choice
 import datetime
 
 
