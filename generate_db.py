@@ -1,5 +1,8 @@
 from db_quality_main import *
+MAX = 1000000
+MIN = -1000000
 
+RANGE = 100000000 #for example
 
 #def get_prev_day( date):
 #    ld_date = datetime.datetime.strptime(date, "%Y-%m-%d")
@@ -10,17 +13,28 @@ from db_quality_main import *
 def get_prev_day_raw( date_raw):
     return date_raw + datetime.timedelta(days=-1)
 
+
+#def random_date( today):
+#    max_day = datetime.date.today()
+
 def generate_db( conn, generate_days, rows_per_day):
-    date = datetime.date.today()
+    today = datetime.date.today()
+    date = today
     for _ in range(generate_days):
         date = get_prev_day_raw(date)
         ld_date = datetime.datetime.strftime(date, "%Y-%m-%d")
+        avg_int = randint(MIN, MAX)
+        avg_float = uniform(MIN,MAX)
 
-        for _ in range(rows_per_day):
-
-            row = ( ld_date, randint(0, 1000000), 1, 2.0, "hi", '2013-01-05')
+        sum = 0
+        for n_th_in_day in range(rows_per_day):
+            current_int = avg_int - rows_per_day + n_th_in_day * 2 + 1
+            current_float = avg_float - rows_per_day + n_th_in_day * 2 + 1
+            sum+=current_float
+            row = ( ld_date, randint(0, 1000000), current_int, avg_float, "hi", '2013-01-05')
             insert_new_row(conn, row)
 
+        print ( sum/rows_per_day, avg_float)
 
 database2 = "pythonsqlite_backup.db"
 
@@ -54,7 +68,7 @@ sql = ''' PRAGMA synchronous = 0; '''
 cur.execute(sql)
 conn.commit()
 
-generate_db(conn, generate_days=10, rows_per_day=15 )
-print_table(conn)
+generate_db(conn, generate_days=10, rows_per_day=16 )
+#print_table(conn)
 
 conn.close()
