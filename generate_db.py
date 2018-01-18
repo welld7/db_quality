@@ -7,11 +7,13 @@ MAX = 1000000
 MAX_STR_LENGTH = 10
 MAX_ID = 1000000
 GENERATE_DAYS=10
-ROWS_PER_DAY=14
+ROWS_PER_DAY=3
 
-# standard Cantar pairing function
+database2 = "pythonsqlite_backup_12.db"
+
+
+# standard Cantor pairing function
 pairing_function = lambda a, b: ((a + b) * (a + b + 1) +b) / 2
-
 
 
 def get_prev_day_raw( date_raw):
@@ -26,7 +28,7 @@ def generate_for_ld_date(ld_date, rows_per_day):
                                      randint(1, 28))  # 2100 is fine
     avg_date_str = datetime.datetime.strftime(avg_date_raw, "%Y-%m-%d")
 
-    # sum = 0
+    print("generate for", ld_date)
     null_cnt = 0
     z0_cnt = 0
     id_int_all_pairs_set = set()
@@ -41,7 +43,7 @@ def generate_for_ld_date(ld_date, rows_per_day):
         z0_cnt += 1 if current_int == 0 else 0
         z0_cnt += 1 if current_float == 0 else 0
 
-        # generate a lower case random sting
+        # generate a lower case random string
         # if the random lenth is 0, None generates
         length = randint(0, MAX_STR_LENGTH)
         if length == 0:
@@ -54,24 +56,24 @@ def generate_for_ld_date(ld_date, rows_per_day):
         # sum += current_float
         id = randint(0, MAX_ID)
         pair = pairing_function(id, current_int)
-        print(id, current_int)
-        # aleady in set of pais?
+        # already in set of pairs?
         if pair not in id_int_all_pairs_set:
             # 1. new pair => to the set of all pairs
-            print("1s time:", id, current_int)
             id_int_all_pairs_set.add(pair)
         else:
             # 2. met again => to the set non-unique pair
-            print("again:", id, current_int)
             non_unique_pair_set.add(pair)
 
         row = (ld_date, id, current_int,
                avg_float, current_sting, avg_date_str)
+
+        print("insert", row)
+
         insert_new_row(conn, row)
 
     print("insert", len(non_unique_pair_set))
-    print(non_unique_pair_set)
-    return (ld_date, len(non_unique_pair_set), rows_per_day, null_cnt, z0_cnt, avg_int, avg_float, avg_date_str)
+    return (ld_date, len(non_unique_pair_set), rows_per_day, null_cnt,
+            z0_cnt, avg_int, avg_float, avg_date_str)
 
 
 def generate_db(conn, generate_days, rows_per_day):
@@ -84,13 +86,10 @@ def generate_db(conn, generate_days, rows_per_day):
 
         insert_new_row_status(conn, row2)
 
-        #print ( sum/rows_per_day, avg_float)
-
-database2 = "pythonsqlite_backup.db"
 
 conn = create_connection(database2)
 cur = conn.cursor()
-
+#todo - drop/delete them
 sql_create_main_table = """ CREATE TABLE IF NOT EXISTS check_object (
                                     load_date date,
                                     id integer,

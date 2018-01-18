@@ -1,15 +1,15 @@
 #from random import randint
 import pytest
-from db_quality_main import *
+from generate_db import *
 
 @pytest.fixture()
 def handle_connection():
-    conn = create_connection(database)
+    conn = create_connection(database2)
     yield conn
 
 @pytest.fixture()
 def handle_connection_and_drop():
-    conn = create_connection(database)
+    conn = create_connection(database)#FIXME FIXME
 
     #drop_object_table(conn)#TODO
     #drop_status_table(conn)#TODO
@@ -46,15 +46,40 @@ def handle_connection_and_drop():
 
 
 @pytest.mark.sanity
-@pytest.mark.skip()
-def test_non_empty_status_table(handle_connection_and_drop):
-    conn = handle_connection_and_drop #create_connection(database)
-    sql = ''' SELECT * from check_status;'''
-
+def test_db_consistency(handle_connection):
+    conn = handle_connection
     cur = conn.cursor()
-    cur.execute(sql)
-    rows = cur.fetchall()
-    assert len(rows) > 0, 'must be not 0'
+
+    # if performance becomes critical, we can create one complex query
+
+    #sql = ''' SELECT load_date from check_status WHERE load_date>=? AND load_date<?;'''
+
+
+    cur.execute(''' SELECT DISTINCT load_date from check_object ;''')
+    all_ld_dates = cur.fetchall()
+
+    for row in all_ld_dates:
+        ld_date = row[0]
+        next_day = get_next_day(ld_date)
+
+        cur.execute(''' SELECT * from check_object WHERE load_date>=? AND load_date<?;''',
+                    (ld_date, next_day))#TODO delete
+        rows = cur.fetchall()
+
+        for row2 in rows:
+            print(row2)
+
+        row_in_check_object_table =\
+            calculate_status_values_in_check_object_table(conn, ld_date, next_day)
+        print("calculated:", row_in_check_object_table)
+        cur.execute(''' SELECT * from check_status WHERE load_date>=? AND load_date<?;''',
+                    (ld_date, next_day))
+        #rows_status = cur.fetchall()
+        rows_status = cur.fetchone()
+
+        print("check_status:", rows_status)
+        print("-------------------------------------------------------------------")
+
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("int_input", [3, 18, 1029])
@@ -92,7 +117,7 @@ def test_avg_int_different_load_dates(handle_connection_and_drop, int_input):
     insert_new_row(conn, row3)
 
     row4 = ('2017-01-04', randint(0, 1000000), 1000000, 2.0, "hi", '2013-01-05')
-    insert_new_row(conn, row4)
+    insert_new_row(conn, row1)
 
     #the avg_int isn't changed by the other day row
     rowid_inserted = add_day_status_row(conn, '2017-01-05')

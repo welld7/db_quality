@@ -236,18 +236,14 @@ def drop_status_table(conn):
     cur = conn.cursor()
     cur.execute(sql)
 
-def get_next_day( load_data):
+def get_next_day(load_data):
     ld_date = datetime.datetime.strptime(load_data, "%Y-%m-%d")
     next_day = datetime.datetime.strftime(ld_date + datetime.timedelta(days=1),
                                           "%Y-%m-%d")
 
     return next_day
 
-
-def add_day_status_row(conn, load_data):
-
-    next_day = get_next_day(load_data)
-
+def calculate_status_values_in_check_object_table( conn, load_data, next_day):
     non_unique_id_int = count_non_unique_id_int(conn, load_data, next_day)
     count = get_count(conn, load_data, next_day)
     null_count = get_null_count(conn, load_data, next_day)
@@ -256,14 +252,19 @@ def add_day_status_row(conn, load_data):
     float_avg = get_float_avg(conn, load_data, next_day)
     date_avg = get_date_avg(conn, load_data, next_day)
 
-    row = (load_data, non_unique_id_int, count, null_count,
-           z0_count, int_avg, float_avg, date_avg)
+    return (load_data, non_unique_id_int, count, null_count,
+            z0_count, int_avg, float_avg, date_avg)
+
+
+def add_day_status_row(conn, load_data):
+
+    next_day = get_next_day(load_data)
+    row = calculate_status_values_in_check_object_table(conn, load_data, next_day)
 
     rowid = insert_new_row_status(conn, row)
     conn.commit()
 
-    print_table(conn)
-
+    #print_table(conn)
     return rowid
 
 
