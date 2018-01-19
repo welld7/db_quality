@@ -46,6 +46,7 @@ def handle_connection_and_drop():
     conn.close()
 
 
+#todo: debug unique,date
 @pytest.mark.sanity
 def test_db_consistency(handle_connection):
     conn = handle_connection
@@ -65,10 +66,10 @@ def test_db_consistency(handle_connection):
         ld_date = row[0]
         next_day = get_next_day(ld_date)
 
+        #debug
         cur.execute(''' SELECT * from check_object WHERE load_date>=? AND load_date<?;''',
                     (ld_date, next_day))#TODO delete
         rows = cur.fetchall()
-
         for row2 in rows:
             print(row2)
 
