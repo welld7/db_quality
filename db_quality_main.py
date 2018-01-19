@@ -4,6 +4,7 @@ import datetime
 
 
 database = "pythonsqlite.db"
+database2 = "pythonsqlite_backup_12.db"
 
 
 def create_connection(db):
@@ -184,7 +185,6 @@ def count_non_unique_id_int(conn, day, next_day):
 
 
 def get_int_avg_in_status_table_by_rowid(conn, rowid):
-    sql = '''SELECT * FROM check_object WHERE id = ?;'''
     cur = conn.cursor()
     cur.execute('SELECT int_avg FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )#sorry for that
     one = cur.fetchone()[0]
@@ -205,11 +205,12 @@ def print_table(conn):
     :param conn:
     :return:
     """
-    sql = ''' SELECT * from check_object;'''
+    sql = ''' SELECT * from check_object ORDER BY load_date DESC;'''
     cur = conn.cursor()
     cur.execute(sql)
     rows = cur.fetchall()
 
+    print("check_object:")
     for row in rows:
         print(row)
 
@@ -217,6 +218,7 @@ def print_table(conn):
     cur.execute(sql)
     rows = cur.fetchall()
 
+    print("check_status:")
     for row in rows:
         print(row)
 

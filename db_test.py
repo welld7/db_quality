@@ -1,6 +1,7 @@
 #from random import randint
 import pytest
-from generate_db import *
+#from generate_db import *
+from db_quality_main import *
 
 @pytest.fixture()
 def handle_connection():
@@ -48,6 +49,8 @@ def handle_connection_and_drop():
 @pytest.mark.sanity
 def test_db_consistency(handle_connection):
     conn = handle_connection
+
+    print_table(conn)
     cur = conn.cursor()
 
     # if performance becomes critical, we can create one complex query
@@ -170,3 +173,6 @@ def test_count(handle_connection_and_drop, number_of_rows):
 #
 #    assert number_of_rows == get_count(conn, day, get_next_day(day))
 
+conn = create_connection(database2)
+print_table(conn)
+conn.close()

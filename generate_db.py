@@ -9,8 +9,6 @@ MAX_ID = 1000000
 GENERATE_DAYS=10
 ROWS_PER_DAY=3
 
-database2 = "pythonsqlite_backup_12.db"
-
 
 # standard Cantor pairing function
 pairing_function = lambda a, b: ((a + b) * (a + b + 1) +b) / 2
@@ -34,9 +32,8 @@ def generate_for_ld_date(ld_date, rows_per_day):
     id_int_all_pairs_set = set()
     non_unique_pair_set = set()
     # just one pair counter for current ld_date for all pairs per day
-    non_unique_pair_cnt = 0
     for n_th_in_day in range(rows_per_day):
-        current_int = 0  # avg_int - rows_per_day + n_th_in_day * 2 + 1
+        current_int = avg_int - rows_per_day + n_th_in_day * 2 + 1
         current_float = avg_float - rows_per_day + n_th_in_day * 2 + 1
 
         # count zero number (int+float)
@@ -53,7 +50,6 @@ def generate_for_ld_date(ld_date, rows_per_day):
             current_sting = ''.join(choice(ascii_lowercase)
                                     for _ in range(length))
 
-        # sum += current_float
         id = randint(0, MAX_ID)
         pair = pairing_function(id, current_int)
         # already in set of pairs?
@@ -64,11 +60,12 @@ def generate_for_ld_date(ld_date, rows_per_day):
             # 2. met again => to the set non-unique pair
             non_unique_pair_set.add(pair)
 
+        #todo: more comlicated algorythm for date generation
+
         row = (ld_date, id, current_int,
-               avg_float, current_sting, avg_date_str)
+               current_float, current_sting, avg_date_str)
 
         print("insert", row)
-
         insert_new_row(conn, row)
 
     print("insert", len(non_unique_pair_set))
@@ -113,9 +110,9 @@ sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
                                 ); """
 create_table(conn, sql_create_status_table)
 
-sql = ''' PRAGMA synchronous = 0; '''
-cur.execute(sql)
-conn.commit()
+#sql = ''' PRAGMA synchronous = 0; '''
+#cur.execute(sql)
+#conn.commit()
 
 generate_db(conn, generate_days=GENERATE_DAYS, rows_per_day=ROWS_PER_DAY )
 print_table(conn)
