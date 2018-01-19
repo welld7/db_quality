@@ -48,6 +48,8 @@ def insert_new_row_status(conn, row):
               VALUES(?,?,?,?,?,?,?,?); '''
     cur = conn.cursor()
     cur.execute(sql, row)
+    conn.commit()
+
     return cur.lastrowid
 
 
@@ -194,9 +196,21 @@ def get_int_avg_in_status_table_by_rowid(conn, rowid):
 def get_float_avg_in_status_table_by_rowid(conn, rowid):
     sql = '''SELECT * FROM check_object WHERE id = ?;'''
     cur = conn.cursor()
-    cur.execute('SELECT float_avg FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )#sorry for that
+    cur.execute('SELECT float_avg FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
     one = cur.fetchone()[0]
     return one
+
+
+def delete_check_object_row_by_rowid(conn, rowid):
+    cur = conn.cursor()
+    cur.execute('DELETE FROM check_object WHERE rowid=? OR rowid=?;', (rowid,rowid) )
+    conn.commit()
+
+
+def delete_check_status_row_by_rowid(conn, rowid):
+    cur = conn.cursor()
+    cur.execute('DELETE FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
+    conn.commit()
 
 
 def print_table(conn):

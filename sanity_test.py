@@ -6,6 +6,8 @@ from db_quality_main import *
 def handle_connection():
     conn = create_connection(database)
     yield conn
+    conn.close()
+
 
 @pytest.fixture()
 def handle_connection_and_drop():
