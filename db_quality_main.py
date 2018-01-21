@@ -2,8 +2,8 @@ import sqlite3
 from random import randint, uniform, choice
 import datetime
 
-
 database = "pythonsqlite.db"
+database_tmp = "pythonsqlite_tmp.db"
 database2 = "pythonsqlite_backup_12.db"
 
 
