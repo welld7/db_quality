@@ -234,6 +234,12 @@ def get_null_count_in_status_table_by_rowid(conn, rowid):
     return one
 
 
+def get_date_avg_in_status_table_by_rowid(conn, rowid):
+    cur = conn.cursor()
+    cur.execute('SELECT date_avg FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
+    one = cur.fetchone()[0]
+    return one
+
 def delete_check_object_row_by_rowid(conn, rowid):
     cur = conn.cursor()
     cur.execute('DELETE FROM check_object WHERE rowid=? OR rowid=?;', (rowid,rowid) )

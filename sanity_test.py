@@ -109,6 +109,30 @@ def test_avg_float_different_load_dates(handle_connection_and_drop, float_input)
 
 
 @pytest.mark.sanity
+@pytest.mark.parametrize("date", ['2020-12-1', '1970-2-28', '1000-10-10'])
+def test_avg_date_one_ld_date(handle_connection_and_drop, date):
+    conn = handle_connection_and_drop
+
+    row1 = (load_date1, randint(0, 1000000), 0, 2.0, some_sting, date)
+    insert_new_row(conn, row1)
+
+    row2 = (load_date1, randint(0, 1000000), 0, 2.0, some_sting, date)
+    insert_new_row(conn, row2)
+
+    row3 = (load_date1, randint(0, 1000000), 0, 2.0, some_sting, date)
+    insert_new_row(conn, row3)
+
+    # we don't know what's going on in add_day_status_row, so we'll check
+    # the avg value in db by id
+    rowid_inserted = add_day_status_row(conn, load_date1)
+    print_table(conn)
+
+    #FIXME int() is a simplification
+    assert int(date[:4]) == int(get_date_avg_in_status_table_by_rowid(conn, rowid_inserted))
+
+
+
+@pytest.mark.sanity
 @pytest.mark.parametrize("number_of_rows", [0, 1, 300])
 def test_count(handle_connection_and_drop, number_of_rows):
     conn = handle_connection_and_drop
