@@ -9,16 +9,67 @@ def handle_connection():
     conn.close()
 
 
+@pytest.mark.sanity_db_exists
+@pytest.mark.db_exists
+def test_check_status_table_exists(handle_connection):
+    conn = handle_connection
+    cur = conn.cursor()
+
+    cur.execute(''' SELECT * FROM sqlite_master WHERE name ='check_status' and type='table'; ''')
+    table = cur.fetchone()
+    assert table
+
+
+@pytest.mark.sanity_db_exists
+@pytest.mark.db_exists
+def test_check_object_table_exists(handle_connection):
+    conn = handle_connection
+    cur = conn.cursor()
+
+    cur.execute(''' SELECT * FROM sqlite_master WHERE name ='check_object' and type='table'; ''')
+    table = cur.fetchone()
+    assert table
+
+
+@pytest.mark.sanity_db_exists
+@pytest.mark.db_exists
+def test_number_of_load_dates(handle_connection):
+    conn = handle_connection
+    cur = conn.cursor()
+
+    cur.execute('''SELECT count(*) from check_status;''')
+    cnt1 = cur.fetchone()
+
+    cur.execute('''SELECT count( DISTINCT load_date)  from check_object;''')
+    cnt2 = cur.fetchone()
+
+    assert cnt1[0] == cnt2[0]
+
+
+@pytest.mark.db_exists
+def test_load_dates_set(handle_connection):
+    conn = handle_connection
+    cur = conn.cursor()
+
+    cur.execute('''SELECT load_date from check_status;''')
+    set1 = set(cur.fetchall())
+
+    cur.execute('''SELECT DISTINCT load_date from check_object;''')
+    set2 = set(cur.fetchall())
+
+    assert set1 == set2
+
+
 #todo: debug unique,date
 @pytest.mark.db_exists
-def test_db_consistency(handle_connection):
+#@pytest.mark.skip
+def test_whole_db_consistency(handle_connection):
     conn = handle_connection
 
     print_table(conn)
     cur = conn.cursor()
 
     # if performance becomes critical, we can create one complex query
-
     cur.execute(''' SELECT DISTINCT load_date from check_object ;''')
     all_ld_dates = cur.fetchall()
 
@@ -44,6 +95,7 @@ def test_db_consistency(handle_connection):
         print("-------------------------------------------------------------------")
 
 
+#FIXME: Change the same DB
 @pytest.mark.db_exists
 @pytest.mark.parametrize("day_input", ['2217-01-05', '3017-01-05'])
 @pytest.mark.parametrize("int_input", [2, -200])
