@@ -194,9 +194,22 @@ def get_int_avg_in_status_table_by_rowid(conn, rowid):
 
 
 def get_float_avg_in_status_table_by_rowid(conn, rowid):
-    sql = '''SELECT * FROM check_object WHERE id = ?;'''
     cur = conn.cursor()
     cur.execute('SELECT float_avg FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
+    one = cur.fetchone()[0]
+    return one
+
+
+def get_z0_count_in_status_table_by_rowid(conn, rowid):
+    cur = conn.cursor()
+    cur.execute('SELECT z0_count FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
+    one = cur.fetchone()[0]
+    return one
+
+
+def get_null_count_in_status_table_by_rowid(conn, rowid):
+    cur = conn.cursor()
+    cur.execute('SELECT null_count FROM check_status WHERE rowid=? OR rowid=?;', (rowid,rowid) )
     one = cur.fetchone()[0]
     return one
 
