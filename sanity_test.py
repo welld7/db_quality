@@ -17,28 +17,9 @@ def handle_connection():
 def handle_connection_and_drop():
     conn = create_connection(database_tmp)
 
-    sql_create_main_table = """ CREATE TABLE IF NOT EXISTS check_object (
-                                        load_date date,
-                                        id integer,
-                                        int_value integer,
-                                        float_value float,
-                                        char_value varchar(10),
-                                        date_value date
-                                    ); """
-
     # id:non-unique
     create_table(conn, sql_create_main_table)
 
-    sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
-                                        load_date date,
-                                        non_unique_id_int integer,
-                                        count integer,
-                                        null_count integer,
-                                        z0_count int,
-                                        int_avg float,
-                                        float_avg float,
-                                        date_avg float
-                                    ); """
     create_table(conn, sql_create_status_table)
     conn.commit()
     cur = conn.cursor()

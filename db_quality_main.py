@@ -6,6 +6,26 @@ database = "pythonsqlite.db"
 database_tmp = "pythonsqlite_tmp.db"
 database2 = "pythonsqlite_backup_12.db"
 
+sql_create_main_table = """ CREATE TABLE IF NOT EXISTS check_object (
+                                    load_date date,
+                                    id integer,
+                                    int_value integer,
+                                    float_value float,
+                                    char_value varchar(10),
+                                    date_value date
+                                ); """
+
+sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
+                                    load_date date,
+                                    non_unique_id_int integer,
+                                    count integer,
+                                    null_count integer,
+                                    z0_count int,
+                                    int_avg float,
+                                    float_avg float,
+                                    date_avg float
+                                ); """
+
 
 def create_connection(db):
     """ create a database connection to the SQLite database
@@ -284,7 +304,7 @@ def calculate_status_values_in_check_object_table( conn, load_data, next_day):
     return (load_data, non_unique_id_int, count, null_count,
             z0_count, int_avg, float_avg, date_avg)
 
-
+# next day is for performance
 def add_day_status_row(conn, load_data):
 
     next_day = get_next_day(load_data)
@@ -297,6 +317,8 @@ def add_day_status_row(conn, load_data):
     return rowid
 
 
+# 1. ID is intentionally non-unique. So ID is NOT a primary key
+# 2. We won't calculate avg for VARCHAR as we don't know how to interpret it
 def main():
 
     # create a database connection
@@ -307,17 +329,6 @@ def main():
         # create tasks table
         #create_table(conn, sql_create_tasks_table)
 
-        # FIXME id is intentionally non-unique
-        # So id is NOT a primary key
-        sql_create_main_table = """ CREATE TABLE IF NOT EXISTS check_object (
-                                            load_date date,
-                                            id integer,
-                                            int_value integer,
-                                            float_value float,
-                                            char_value varchar(10),
-                                            date_value date
-                                        ); """
-
         create_table(conn, sql_create_main_table)
 
         load_data = '2015-02-09'
@@ -327,20 +338,6 @@ def main():
 
         row = (load_data, randint(0, 1000000), None, 10, "1hi", '2017-01-05')
         insert_new_row(conn, row)
-
-
-        #drop_status_table(conn)
-        #We won't calculate avg for VARCHAR as we don't know how to
-        sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
-                                            load_date date,
-                                            non_unique_id_int integer,
-                                            count integer,
-                                            null_count integer,
-                                            z0_count int,
-                                            int_avg float,
-                                            float_avg float,
-                                            date_avg float
-                                        ); """
 
         create_table(conn, sql_create_status_table)
 

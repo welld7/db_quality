@@ -60,7 +60,7 @@ def generate_for_ld_date(ld_date, rows_per_day):
             # 2. met again => to the set non-unique pair
             non_unique_pair_set.add(pair)
 
-        #todo: more comlicated algorythm for date generation
+        #todo: more complicated algorythm for date generation
 
         row = (ld_date, id, current_int,
                current_float, current_sting, avg_date_str)
@@ -83,40 +83,27 @@ def generate_db(conn, generate_days, rows_per_day):
 
         insert_new_row_status(conn, row2)
 
-
-if __name__ == '__main__':
-
+def main():
     conn = create_connection(database2)
     cur = conn.cursor()
-    #todo - drop/delete them
-    sql_create_main_table = """ CREATE TABLE IF NOT EXISTS check_object (
-                                        load_date date,
-                                        id integer,
-                                        int_value integer,
-                                        float_value float,
-                                        char_value varchar(10),
-                                        date_value date
-                                    ); """
 
     create_table(conn, sql_create_main_table)
-
-    sql_create_status_table = """ CREATE TABLE IF NOT EXISTS check_status (
-                                        load_date date,
-                                        non_unique_id_int integer,
-                                        count integer,
-                                        null_count integer,
-                                        z0_count int,
-                                        int_avg float,
-                                        float_avg float,
-                                        date_avg float
-                                    ); """
     create_table(conn, sql_create_status_table)
 
-    #sql = ''' PRAGMA synchronous = 0; '''
-    #cur.execute(sql)
-    #conn.commit()
+    cur.execute(''' delete from check_status; ''')
+    cur.execute(''' delete from check_object; ''')
+    conn.commit()
+
+    #for preformance reasons
+    sql = ''' PRAGMA synchronous = 0; '''
+    cur.execute(sql)
+    conn.commit()
 
     generate_db(conn, generate_days=GENERATE_DAYS, rows_per_day=ROWS_PER_DAY )
     print_table(conn)
 
     conn.close()
+
+
+if __name__ == '__main__':
+    main()
