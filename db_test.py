@@ -60,46 +60,58 @@ def test_load_dates_set(handle_connection):
     assert set1 == set2
 
 
-#todo: debug unique,date
+#TODO: debug unique&date
 @pytest.mark.db_exists
 #@pytest.mark.skip
 def test_whole_db_consistency(handle_connection):
     conn = handle_connection
 
-    print_table(conn)
+    #print_table(conn)
     cur = conn.cursor()
 
     # if performance becomes critical, we can create one complex query
     cur.execute(''' SELECT DISTINCT load_date from check_object ;''')
     all_ld_dates = cur.fetchall()
 
+    row_in_check_object_table_list = []
+    rows_status_list=[]
     for row in all_ld_dates:
         ld_date = row[0]
         next_day = get_next_day(ld_date)
 
-        #debug
+        #debug TODO: delete it
         cur.execute(''' SELECT * from check_object WHERE load_date>=? AND load_date<?;''',
-                    (ld_date, next_day))#TODO delete
+                    (ld_date, next_day))
         rows = cur.fetchall()
         for row2 in rows:
             print(row2)
 
         row_in_check_object_table =\
             calculate_status_values_in_check_object_table(conn, ld_date, next_day)
+        row_in_check_object_table_list.append(row_in_check_object_table)
         print("calculated:", row_in_check_object_table)
         cur.execute(''' SELECT * from check_status WHERE load_date>=? AND load_date<?;''',
                     (ld_date, next_day))
         rows_status = cur.fetchone()
+        rows_status_list.append(rows_status)
 
         print("check_status:", rows_status)
         print("-------------------------------------------------------------------")
 
+    #TODO: elaborater comparison
+    assert row_in_check_object_table_list == rows_status_list
 
-#FIXME: Change the same DB
+#only some subset of the DB (useful for huge DBs)
+@pytest.mark.db_exists
+@pytest.mark.skip
+def test_subset_db_consistency(handle_connection):
+     pass
+
+#FIXME: Changing the same DB in this test
 @pytest.mark.db_exists
 @pytest.mark.parametrize("day_input", ['2217-01-05', '3017-01-05'])
 @pytest.mark.parametrize("int_input", [2, -200])
-def test_add_new_day(handle_connection, day_input, int_input):
+def test_add_new_day_to_db(handle_connection, day_input, int_input):
     conn = handle_connection
 
     row1 = (day_input, randint(0, 1000000), 0, 2.0, "hi", '2013-01-05')

@@ -24,7 +24,7 @@ def handle_connection_and_drop():
     conn.commit()
     cur = conn.cursor()
 
-    #delete rows in case something has alredy been there
+    #delete rows in case something has already been there
     cur.execute(''' delete from check_status; ''')
     cur.execute(''' delete from check_object; ''')
     conn.commit()
@@ -122,10 +122,8 @@ def test_avg_date_one_ld_date(handle_connection_and_drop, date):
     row3 = (load_date1, randint(0, 1000000), 0, 2.0, some_sting, date)
     insert_new_row(conn, row3)
 
-    # we don't know what's going on in add_day_status_row, so we'll check
-    # the avg value in db by id
     rowid_inserted = add_day_status_row(conn, load_date1)
-    print_table(conn)
+    #print_table(conn)
 
     #FIXME int() is a simplification
     assert int(date[:4]) == int(get_date_avg_in_status_table_by_rowid(conn, rowid_inserted))
@@ -157,10 +155,7 @@ def test_z0_count_one_date(handle_connection_and_drop, rows_x3_input):
         row2 = (load_date1, randint(0, 1000000), 0, 1.0, some_sting, some_date2)
         insert_new_row(conn, row2)
 
-    # we don't know what's going on in add_day_status_row, so we'll check
-    # the avg value in db by id
     rowid_inserted = add_day_status_row(conn, load_date1)
-    #print_table(conn)
 
     assert rows_x3_input * 3 == get_z0_count_in_status_table_by_rowid(conn, rowid_inserted)
 
@@ -177,11 +172,27 @@ def test_null_count_one_date(handle_connection_and_drop, rows_x3_input):
         row2 = (load_date1, randint(0, 1000000), 0, 0, None, None)
         insert_new_row(conn, row2)
 
-    # we don't know what's going on in add_day_status_row, so we'll check
-    # the avg value in db by id
     rowid_inserted = add_day_status_row(conn, load_date1)
     #print_table(conn)
 
     assert rows_x3_input * 3 == get_null_count_in_status_table_by_rowid(conn, rowid_inserted)
 
 
+@pytest.mark.sanity
+def test_non_unique_one_date(handle_connection_and_drop, int_input):
+    conn = handle_connection_and_drop
+
+    row1 = (load_date1, 0, 0, 2.0, some_sting, some_date2)
+    insert_new_row(conn, row1)
+
+    row2 = (load_date1, 0, 0, 2.0, some_sting, some_date2)
+    insert_new_row(conn, row2)
+
+    # we don't know what's going on in add_day_status_row, so we'll check
+    # the avg value in db by id
+    rowid_inserted = add_day_status_row(conn, load_date1)
+    #print_table(conn)
+
+    assert 1 == get_non_unique_id_int_in_status_table_by_rowid(conn, rowid_inserted)
+
+#TODO: add more tests for a different ld_date
